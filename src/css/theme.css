@@ -1,0 +1,20 @@
+.van-cell {
+  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0.0533rem 0.0533rem 0.1333rem 0.0267rem rgba(0, 0, 0, 0.1);
+  border-radius: 0.2667rem;
+}
+.van-cell .van-cell__title {
+  margin-right: 1.0667rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break: break-all;
+}
+.van-cell .van-cell__left-icon {
+  position: absolute;
+  right: 0.5333rem;
+  font-size: 20px;
+}
+.van-cell .van-cell__label {
+  color: #666;
+}
