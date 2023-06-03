@@ -1,7 +1,7 @@
 <template>
   <div>
     <transition name="play-tran">
-      <div class="play" v-show="show">
+      <div class="play" v-show="showPlay">
         <!-- 模糊背景(靠样式设置), 固定定位 -->
         <div class="song-bg" :style="`background-image: url(${songInfo && songInfo.al && songInfo.al.picUrl}?imageView&thumbnail=360y360&quality=75&tostatic=0);`"></div>
         <!-- <div class="song-bg" :style="`background-image: url(${songInfo.al.picUrl});`"></div> -->
@@ -26,7 +26,29 @@
           <!-- 播放按钮 -->
           <div class="start-box" @click="audioStart">
             <span class="song-start" v-show="!playState"></span>
+            <span class="song-stop" v-show="playState"></span>
           </div>
+          <!--上一首 -->
+          <div class="pre-song" @click="playPrevious">
+            <svg t="1651474558237" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4715" width="200" height="200">
+              <path
+                d="M224.8 907.5c0 9.5-3.8 18.6-10.5 25.4-6.7 6.7-15.9 10.5-25.4 10.5h-71.7c-9.5 0-18.6-3.8-25.4-10.5-6.7-6.7-10.5-15.9-10.5-25.4v-789c0-9.5 3.8-18.6 10.5-25.4 6.7-6.7 15.8-10.5 25.4-10.5h71.7c19.8 0 35.9 16.1 35.9 35.9v789z m717.2-784c-0.2-19.1-10.2-36.7-26.5-46.6l-8.6-4.3c-17.4-11.4-40-11.4-57.4 0L320.9 446.3c-14.3 10-22.8 26.3-23 43.8v44.5c0.1 17.4 8.7 33.8 23 43.8l528.6 371.5c17.4 11.4 40 11.4 57.4 0l8.6-4.3c16.4-9.8 26.5-27.5 26.5-46.6V123.5z m0 0"
+                fill="#ffffff"
+                p-id="4716"
+              ></path>
+            </svg>
+          </div>
+          <!-- 下一首 -->
+          <div class="next-song" @click="playNext">
+            <svg t="1651473182445" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3696" width="200" height="200">
+              <path
+                d="M941.9 116v788.8c0 9.5-3.8 18.6-10.5 25.4-6.7 6.7-15.8 10.5-25.4 10.5h-71.7c-9.5 0-18.6-3.8-25.3-10.5-6.7-6.7-10.5-15.8-10.5-25.4V116c0-9.5 3.8-18.6 10.5-25.4 6.7-6.7 15.8-10.5 25.3-10.5H906c9.5 0 18.6 3.8 25.4 10.5 6.7 6.7 10.5 15.9 10.5 25.4z m-768-43.1c-17.4-11.4-39.9-11.4-57.4 0l-8.6 4.3c-15.6 9.3-25.5 25.7-26.5 43.7v778c0.2 19.1 10.2 36.7 26.5 46.6l8.6 4.3c17.5 11.1 39.8 11.1 57.4 0l528.5-371.4c14.3-10 22.8-26.3 22.9-43.7v-44.5c-0.1-17.4-8.7-33.7-22.9-43.7L173.9 72.9z m0 0"
+                fill="#ffffff"
+                p-id="3697"
+              ></path>
+            </svg>
+          </div>
+
           <!-- 播放歌词容器 -->
           <div class="song-msg">
             <!-- 歌词部分-随着时间切换展示一句歌词 -->
@@ -50,12 +72,16 @@
         <!-- 评论页面 -->
         <transition name="comment-tran">
           <div class="comment-container" v-show="showComment">
-            <van-list v-model="loading" :finished="finished" finished-text="老板,暂时没有更多评论了喔 ლ(╹ε╹ლ)" :immediate-check="false" @load="onLoad">
+            <van-list v-if="commentList.length" v-model="loading" :finished="finished" finished-text="老板,暂时没有更多评论了喔 ლ(╹ε╹ლ)" :immediate-check="false" @load="onLoad">
               <!-- <div class="noCommentTip" v-if="!commentList.length">老板,暂时没有评论哦~</div> -->
               <div class="comment-item" v-for="(item, index) in commentList" :key="index">
                 <div class="commentBgc" :style="`background-image: url(${item.user.avatarUrl});`"></div>
+                <span class="commentUser">{{ item.user.nickname }}</span
+                ><span class="commentDate">{{ item.timeStr }}</span>
                 <div class="commentContent">
                   {{ item.content }}
+                </div>
+                <div class="loveCount">
                   <svg t="1649872604115" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3263" width="200" height="200">
                     <path
                       d="M913.92 208.384c-98.816-98.816-258.56-98.816-357.376 0l-41.984 41.984-41.984-41.984c-98.816-98.816-258.56-98.816-357.376 0-98.304 98.816-98.304 258.56 0.512 357.376l52.224 52.224 337.408 337.408c5.632 5.632 14.336 5.632 19.968 0l337.408-337.408 52.224-52.224c97.792-98.816 97.792-258.56-1.024-357.376z"
@@ -64,17 +90,16 @@
                     ></path></svg
                   >{{ item.likedCount }}
                 </div>
-                <span class="commentUser">{{ item.user.nickname }}</span
-                ><span class="commentDate">{{ item.timeStr }}</span>
               </div>
             </van-list>
+            <div class="loading" v-if="!commentList.length && idArr.length"><img src="@/assets/images/loading.gif" /></div>
           </div>
         </transition>
-        <!-- <router-view class="commentList"></router-view> -->
       </div>
     </transition>
+
     <!-- 切换界面大小 -->
-    <div class="toggle" :style="`transform: translateX(-50%)  rotate(${arrowDeg})`" @click="toggle"><van-icon name="arrow-up" /><br /><van-icon name="arrow-up" /></div>
+    <div class="toggle" :style="`transform: translateX(-50%)  rotate(${arrowDeg})`" @click="toggle"><van-icon name="arrow-up" /></div>
   </div>
 </template>
 
@@ -91,9 +116,6 @@ export default {
   data() {
     return {
       playState: false, // 音乐播放状态(true暂停, false播放)
-      // id: this.$route.query.id, // 上一页传过来的音乐id
-      // id: this.$store.state.songId,
-      // id: this.songId,
       songInfo: {}, // 歌曲信息
       lyric: {}, // 歌词枚举对象(需要在js拿到歌词写代码处理后, 按照格式保存到这个对象)
       curLyric: '', // 当前显示哪句歌词
@@ -103,7 +125,7 @@ export default {
       preLyric: '',
       nextLyric: '',
       timeIndex: 0,
-      show: false,
+      // show: true,
       commentList: [],
       showComment: false,
       commentOffset: 1,
@@ -115,13 +137,13 @@ export default {
     }
   },
   computed: {
-    ...mapState(['id']),
+    ...mapState(['id', 'idArr', 'showPlay']),
     needleDeg() {
       // 留声机-唱臂的位置属性
       return this.playState ? '-7deg' : '-38deg'
     },
     arrowDeg() {
-      return this.show ? '180deg' : '0'
+      return this.showPlay ? '180deg' : '0'
     },
     finished() {
       if (this.commentList === []) {
@@ -131,9 +153,34 @@ export default {
       } else {
         return false
       }
+    },
+    nextId() {
+      const currIdIndex = this.idArr.indexOf(this.id)
+      if (currIdIndex === this.idArr.length - 1) {
+        return this.idArr[0]
+      } else {
+        return this.idArr[currIdIndex + 1]
+      }
+    },
+    preId() {
+      const currIdIndex = this.idArr.indexOf(this.id)
+      if (currIdIndex === 0) {
+        return this.idArr[this.idArr.length - 1]
+      } else {
+        return this.idArr[currIdIndex - 1]
+      }
     }
   },
   methods: {
+    // 播放上一首
+    playPrevious() {
+      this.$store.commit('getId', this.preId)
+    },
+    // 播放下一首
+    playNext() {
+      this.$store.commit('getId', this.nextId)
+    },
+    // 获取歌曲详情
     async getSong() {
       // 获取歌曲详情, 和歌词方法
       const res = await getSongByIdAPI(this.id)
@@ -145,6 +192,7 @@ export default {
       // 初始化完毕先显示零秒歌词
       this.curLyric = this.lyric[0]
     },
+    // 格式化歌词
     _formatLyr(lyricStr) {
       // 可以看network观察歌词数据是一个大字符串, 进行拆分.
       const reg = /\[.+?\]/g //
@@ -171,17 +219,23 @@ export default {
 
       return lyricObj
     },
+    // 播放音乐
     audioStart() {
       // 播放按钮 - 点击事件
       if (!this.playState) {
         // 如果状态为false
+
         this.$refs.audio.play() // 调用audio标签的内置方法play可以继续播放声音
+        this.playState = true
       } else {
         this.$refs.audio.pause() // 暂停audio的播放
+        this.playState = false
       }
+
       // this.playState = !this.playState // 点击设置对立状态
       // this.playState = !this.$refs.audio.paused // 点击设置对立状态
     },
+    // 显示歌词
     showLyric() {
       // 监听播放audio进度, 切换歌词显示
       this.$refs.audio.addEventListener('timeupdate', () => {
@@ -216,15 +270,45 @@ export default {
         // }
       })
     },
+    // 是否显示播放界面
     toggle() {
-      this.show = !this.show
+      this.$store.commit('changeShowPlay', !this.showPlay)
+    },
+    // 播放、暂停、结束、出错
+    playStatus() {
+      // 开始播放
+      this.$refs.audio.addEventListener('play', () => {
+        this.playState = true
+      })
+      // 暂停播放
+      this.$refs.audio.addEventListener('paused', () => {
+        this.playState = false
+      })
+      // 结束播放，播放下一首
+      this.$refs.audio.addEventListener('ended', () => {
+        this.playState = false
+        this.$store.commit('getId', this.nextId)
+      })
+      // 出错,播放下一首
+      this.$refs.audio.addEventListener('error', () => {
+        this.playState = false
+        this.$notify({
+          message: '此曲需要VIP\n为了您的钱包着想\n即将自动播放下一首~~~',
+          color: 'pink',
+          background: 'rgba(0,0,0,.8)',
+          duration: '4000'
+        })
+        setTimeout(() => {
+          this.$store.commit('getId', this.nextId)
+        }, 2000)
+      })
     },
     // 获取评论
     async getComment() {
       this.showComment = !this.showComment
       if (this.showComment && this.id) {
         const res = await getCommentAPI(this.id, this.commentOffset)
-        this.commentList = res.data.comments
+        this.commentList = res.data.data.comments
         this.commentOffset = 2
         // if (this.commentList === []) this.commentList = [{ content: '暂时没有评论哦,老板~' }]
       }
@@ -233,54 +317,36 @@ export default {
     async onLoad() {
       this.resTemp = await getCommentAPI(this.id, this.commentOffset, this.commentList[this.commentList.length - 1].time)
 
-      this.commentListTemp = this.resTemp.data.comments
+      this.commentListTemp = this.resTemp.data.data.comments
       this.flag = true
-      console.log(this.commentListTemp)
-      console.log(this.commentOffset)
       // if (this.commentListTemp === []) this.finished = true
       this.commentList = this.commentList.concat(this.commentListTemp)
       this.loading = false
       this.commentOffset++
     }
   },
-  watch: {
-    // id() {
-    //   location.reload(true)
-    // }
-  },
-
   mounted() {
     if (!this.id) {
-      // console.log('return了')
       return true
     } else {
       this.playState = true
       this.getSong()
+      this.showLyric()
+      this.playStatus()
     }
-    this.showLyric()
-
-    // 结束播放
-    this.$refs.audio.addEventListener('ended', () => {
-      this.playState = false
-    })
   }
 }
 </script>
 
 <style lang="less" scoped>
-/* .header {
-  height: 50px;
-} */
-
 .play {
   position: fixed;
   top: 0;
   /* bottom: 40px; */
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: 9991;
   height: 100%;
-  border-bottom: 1px solid red;
   overflow: hidden;
   transform-origin: bottom center;
 }
@@ -309,6 +375,30 @@ export default {
   transform: translateY(50px);
   opacity: 0;
 }
+.pre-song {
+  z-index: 999999;
+  position: absolute;
+  top: 111px;
+  left: -40px;
+  width: 40px;
+  height: 26px;
+  .icon {
+    width: 100%;
+    height: 100%;
+  }
+}
+.next-song {
+  position: absolute;
+  top: 111px;
+  right: -40px;
+  z-index: 999999;
+  width: 40px;
+  height: 26px;
+  .icon {
+    width: 100%;
+    height: 100%;
+  }
+}
 .commentBtn {
   position: absolute;
   bottom: 45px;
@@ -330,7 +420,7 @@ export default {
   right: 0;
   margin: 0 auto;
   padding-top: 10px;
-  width: 80%;
+  width: 90%;
   height: 75%;
   z-index: 99999;
   border-radius: 10px;
@@ -365,10 +455,18 @@ export default {
     }
     .commentContent {
       padding: 5px;
-      padding-left: 10px;
-      margin-bottom: 10px;
+      padding: 10px 20px;
+      margin: 25px 0;
       border-radius: 10px;
       font-size: 12px;
+    }
+    .loveCount {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      // left: 50%;
+      // transform: translateX(-50%);
+      font-size: 10px;
       .icon {
         height: 14px;
         width: 14px;
@@ -378,39 +476,69 @@ export default {
       }
     }
     .commentUser {
-      float: left;
+      position: absolute;
+      top: 10px;
+      left: 0;
       margin-left: 10px;
       padding: 0 10px;
-      font-size: 10px;
-      background-color: rgba(72, 72, 72, 0.6);
+      border: 1px solid pink;
+      font-size: 12px;
+      background-color: rgba(0, 0, 0, 0.8);
 
       border-radius: 10px;
     }
     .commentDate {
-      float: right;
+      position: absolute;
+      top: 10px;
+      right: 0;
       margin-right: 10px;
+      border: 1px solid pink;
       padding: 0 10px;
-      font-size: 10px;
+      font-size: 12px;
       border-radius: 10px;
-      background-color: rgba(72, 72, 72, 0.6);
+      background-color: rgba(0, 0, 0, 0.8);
     }
+  }
+}
+.loading {
+  position: absolute;
+  top: 30vh;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  border-radius: 100%;
+  opacity: 0.5;
+  img {
+    width: 100%;
+    transform: scale(4.2);
   }
 }
 /* 切换大小 */
 .toggle {
+  box-sizing: border-box;
   position: fixed;
   bottom: 10px;
   left: 50%;
   width: 60px;
   height: 60px;
-  line-height: 30px;
+  line-height: 55px;
   background-color: rgba(255, 196, 206, 0.4);
   backdrop-filter: blur(5px);
   border-radius: 30px;
   color: #fefefe;
   text-align: center;
-  z-index: 9998;
+  z-index: 10000;
   transition: all 0.5s;
+  border-top: 2px solid rgba(0, 255, 255, 0.501);
+  border-bottom: 2px solid rgba(0, 255, 255, 0.501);
+  box-shadow: -3px -3px 20px 1px rgba(255, 192, 203, 0.515), 3px 3px 20px 1px rgba(0, 255, 255, 0.212);
+  .van-icon:before {
+    font-size: 22px;
+    color: white;
+  }
 }
 .controls {
   position: absolute;
@@ -419,7 +547,10 @@ export default {
   transform: translateX(-50%);
   height: 25px;
   width: 90%;
-  opacity: 0.3;
+  opacity: 0.5;
+  border: 3px solid rgba(255, 192, 203, 0);
+  border-radius: 100px;
+  box-shadow: inset 0 0 5px 2px pink;
   z-index: 99998;
 }
 .song-bg {
@@ -478,6 +609,12 @@ export default {
   width: 56px;
   height: 56px;
   background: url('./img/start.png');
+  background-size: 100%;
+}
+.song-stop {
+  width: 56px;
+  height: 56px;
+  background: url('./img/stop.png');
   background-size: 100%;
 }
 .needle {

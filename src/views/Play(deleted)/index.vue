@@ -113,12 +113,12 @@ export default {
         lyricObj[ms + Number(ss)] = contentArr[index]
       })
       // 返回得到的歌词对象(可以打印看看)
-      console.log(lyricObj)
+      // console.log(lyricObj)
       for (const key in lyricObj) {
         this.lyricIndexArr.push(Number(key))
         this.lyricArr.push(lyricObj[key])
       }
-      console.log(this.lyricArr)
+      // console.log(this.lyricArr)
 
       return lyricObj
     },
@@ -140,7 +140,7 @@ export default {
         if (this.lyric[curTime]) {
           this.curLyric = this.lyric[curTime]
           this.timeIndex = this.lyricIndexArr.indexOf(curTime)
-          console.log(this.timeIndex)
+          // console.log(this.timeIndex)
           if (this.timeIndex - 1 < 0) {
             this.preLyric = ''
           } else {

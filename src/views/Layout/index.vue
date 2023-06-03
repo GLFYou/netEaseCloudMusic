@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <!-- 顶部导航栏 -->
-    <!-- <van-nav-bar :title="active === 0 ? '网抑云' : '搜索'" placeholder fixed /> -->
+  <div class="layout">
     <!-- 中间视图 -->
     <!-- 路由缓存 -->
     <keep-alive>
@@ -39,10 +37,11 @@ export default {
 </script>
 
 <style lang="less" scoped>
+
 /deep/.van-tabbar {
   height: 40px;
   border-radius: 0.2667rem 0.2667rem 0 0;
-  z-index: 9999;
+  z-index: 9990;
   overflow: hidden;
   background-color: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(5px);

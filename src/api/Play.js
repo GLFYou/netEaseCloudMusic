@@ -1,9 +1,12 @@
 import request from '@/utils/request.js'
 
 // 获取歌曲详情
-export const getSongById = (id) =>
+export const getSongById = (ids) =>
   request({
-    url: `/song/detail?ids=${id}`
+    url: '/song/detail',
+    params: {
+      ids
+    }
   })
 
 // 获取歌词

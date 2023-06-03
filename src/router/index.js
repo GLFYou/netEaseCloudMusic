@@ -3,7 +3,8 @@ import VueRouter from 'vue-router'
 import Layout from '@/views/Layout'
 import Home from '@/views/Home'
 import Search from '@/views/Search'
-import playList from '@/views/playList/index.vue'
+import playList from '@/views/playList'
+import SingerSongsList from '@/views/SingerSongsList'
 // import Comment from '@/views/Comment'
 // import Play from '@/views/Play'
 // import Play from '@/components/Play'
@@ -27,7 +28,8 @@ const routes = [
     children: [
       { path: 'home', component: Home },
       { path: 'search', component: Search },
-      { path: 'playlist/:id', component: playList }
+      { path: 'playlist/:id', component: playList },
+      { path: 'singersongslist/:id', component: SingerSongsList }
       // { path: 'comment', component: Comment }
     ]
   }

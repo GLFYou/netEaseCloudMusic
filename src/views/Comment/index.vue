@@ -17,8 +17,6 @@ export default {
   },
   async created() {
     const res = await getCommentAPI()
-    console.log(res)
-    console.log(this.id)
   }
 }
 </script>

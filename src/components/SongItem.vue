@@ -1,6 +1,6 @@
 <template>
   <div>
-    <van-cell class="vancell" center :title="songName" :label="author" icon="play-circle-o" @click="playFn(id_)" />
+    <van-cell class="vancell" center :title="songName" :label="author" icon="play-circle-o" @click="playFn(id_, idArr)" />
   </div>
 </template>
 
@@ -10,20 +10,21 @@ export default {
   props: {
     songName: String, // 歌名
     author: String, // 作者
-    id_: Number // id
+    id_: Number, // id
+    idArr: Array // 播放列表id
   },
-  // computed: {
-  //   ...mapState(['songId'])
-  // },
   methods: {
-    ...mapMutations(['getId']),
-    playFn(id_) {
-      // this.$router.push({ path: '/play', query: { id: this.id } })
-      // console.log(this.id)
+    ...mapMutations(['getId', 'getIdArr']),
+    playFn(id_, idArr) {
       this.getId(id_)
+      this.getIdArr(idArr)
     }
   }
 }
 </script>
 
-<style></style>
+<style lang="less" scoped>
+/deep/ .vancell {
+  border-radius: 10px !important;
+}
+</style>

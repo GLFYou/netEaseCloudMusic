@@ -20,12 +20,15 @@
     <div class="box-container">
       <p class="hot-title">{{ searchTitle }}</p>
       <!-- 热词 -->
-      <ul class="hot-container" v-if="hotVisible">
+      <ul class="hot-container" v-if="hotVisible && hotWords.length">
         <li class="hot-word" v-for="(item, index) in hotWords" :key="index" @click="valToInput(item.first)">{{ item.first }}</li>
       </ul>
       <!-- 搜索结果 -->
-      <van-list v-model="loading" :finished="finished" finished-text="老板,网抑云没有存货了╮(╯﹏╰）╭" :immediate-check="false" @load="onLoad">
-        <SongItem class="vancell" v-for="(item, index) in searchList" :key="index" :songName="item.name" :author="item.ar[0].name" :id_="item.id"></SongItem>
+      <van-list v-else v-model="loading" :finished="finished" finished-text="老板,网抑云没有存货了╮(╯﹏╰）╭" loading-text="加载中~~~" :immediate-check="false" @load="onLoad">
+        <template v-if="searchList.length">
+          <SongItem class="vancell" v-for="(item, index) in searchList" :key="index" :songName="item.name" :author="item.ar[0].name" :id_="item.id" :idArr="[item.id]"></SongItem>
+        </template>
+        <div class="loading" v-else><img src="@/assets/images/loading.gif" /></div>
         <!-- <van-cell class="vancell" center v-for="(item, index) in searchList" :key="index" :title="item.name" :label="item.ar[0].name" icon="play-circle-o" /> -->
       </van-list>
     </div>
@@ -47,14 +50,15 @@ export default {
       searchTitle: '热门搜索',
       hotVisible: true,
       resSearch: {},
-      resSearchTemp: {},
+      // resSearchTemp: {},
       searchList: [],
-      searchListTemp: [],
+      // searchListTemp: [],
       keywords: '',
       firstImg: '',
       loading: false,
       finished: false,
-      offSet: 1
+      offSet: 0
+      // searchSongTempId: []
     }
   },
   async created() {
@@ -74,33 +78,44 @@ export default {
         this.resSearch = {} // 重置获取内容
         this.searchList = []
         this.keywords = this.searchValue // 转存，为onLoad做准备
-        this.offSet = 1 // 重置页数
+        this.offSet = 0 // 重置页数
+        this.firstImg = []
         this.searchTitle = '最佳匹配'
         this.hotVisible = false
+        // 搜索数据
         this.resSearch = await searchResultAPI(this.searchValue, 15, this.offSet)
         this.searchList = this.resSearch.data.result.songs
         this.firstImg = this.searchList[0].al.picUrl
-        this.offSet = 2
+        this.offSet += 15
+        this.loading = false
       } else {
         return true
       }
       // 下拉加载更多
     },
     async onLoad() {
-      if (this.searchList === []) {
+      if (this.hotVisible) {
         return true
       }
       // 获取第n+1页数据
-      if (this.searchListTemp.length === 0) {
-        this.finished = true
-      }
-      this.resSearchTemp = await searchResultAPI(this.keywords, 15, this.offSet)
-      this.searchListTemp = this.resSearchTemp.data.result.songs
 
+      const searchResult = await searchResultAPI(this.keywords, 15, this.offSet)
+      // let searchSongTemp = []
+      const searchSongs = searchResult.data.result.songs
+      // console.log('临时')
+      // console.log(this.searchSongTempId)
+      // console.log('新获取')
+      // console.log(searchSongs)
+      if (!searchSongs) {
+        this.loading = false
+        this.finished = true
+        return
+      }
+      // this.searchSongTempId = searchSongs
       // 与第前n页数据合并
-      this.searchList = this.searchList.concat(this.searchListTemp)
+      this.searchList = this.searchList.concat(searchSongs)
       this.loading = false
-      this.offSet++
+      this.offSet += 15
     },
     // 搜索框失焦
     onBlur() {
@@ -136,6 +151,7 @@ export default {
   background-position-x: 50%;
   padding-bottom: 0.6667rem;
   background-color: rgba(255, 192, 203, 0.321);
+  min-height: 100vh;
   .limit {
     height: 1px;
   }
@@ -151,8 +167,23 @@ export default {
   //   filter: blur(10px);
   // }
 }
+.loading {
+  position: absolute;
+  top: 50vh;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  border-radius: 100%;
+  img {
+    width: 100%;
+    transform: scale(4.2);
+  }
+}
 .search-container {
-  width: 92%;
+  width: 95%;
   z-index: 666;
   position: fixed;
   top: 0;
@@ -160,18 +191,26 @@ export default {
   transform: translateX(-50%);
   /deep/.van-search {
     background-color: rgba(236, 202, 216, 0.8);
-    border-radius: 0 0 20px 20px;
+    backdrop-filter: blur(5px);
+    border-radius: 0 0 10px 10px;
     margin: 0;
     // padding: 0;
+    .van-search__content {
+      padding-left: 0;
+    }
+    .van-icon-search:before {
+      margin-left: 10px;
+    }
   }
   .search-btn {
     padding: 0 0.2667rem;
-    border-radius: 0.2667rem;
+    border-radius: 10px;
     border: 2px solid pink;
   }
   .van-search__action:active {
     background-color: transparent;
   }
+
   .suggest-container {
     position: absolute;
     top: 50px;
@@ -208,19 +247,17 @@ export default {
 }
 .box-container {
   .vancell {
-    margin-bottom: 0.2667rem;
+    margin-bottom: 10px;
     backdrop-filter: blur(5px);
   }
   margin: 0 0.2667rem;
 
   .hot-title {
-    height: 0.6667rem;
-    line-height: 0.6667rem;
-    margin-left: 0.1867rem;
-    margin-right: 0.1867rem;
-    margin-top: 70px;
-    margin-bottom: 0.2667rem;
-    padding-left: 0.2667rem;
+    height: 40px;
+    line-height: 40px;
+    margin-top: 65px;
+    margin-bottom: 10px;
+    padding-left: 20px;
     font-size: 14px;
     color: #666;
     background-image: -webkit-linear-gradient(left, pink, rgba(158, 250, 250, 0.962));
@@ -230,9 +267,7 @@ export default {
     display: flex !important;
     justify-content: left;
     flex-wrap: wrap;
-
     margin-top: 0.2667rem;
-
     .hot-word {
       margin: 0.1333rem 0.1333rem;
       padding: 0.1333rem 0.2667rem;
