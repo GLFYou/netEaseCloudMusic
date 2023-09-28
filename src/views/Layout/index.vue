@@ -37,9 +37,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.layout{
-  border: 1px solid aqua;
-}
 
 /deep/.van-tabbar {
   height: 40px;
