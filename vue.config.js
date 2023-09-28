@@ -16,7 +16,6 @@ module.exports = defineConfig({
         }
       }
     }
-  },
-  outputDir: 'wangyiyun',
-  publicPath: process.env.NODE_ENV === 'production' ? '/wangyiyun/' : '/'
+  }
+  // publicPath: process.env.NODE_ENV === 'production' ? '/wangyiyun/' : '/'
 })

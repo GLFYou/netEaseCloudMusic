@@ -117,7 +117,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 26px;
+    font-size: 20px;
     color: rgb(255, 255, 255);
     img {
       width: 50px;
@@ -127,9 +127,10 @@ export default {
     }
     span {
       padding: 3px 20px;
-      background: rgb(45, 45, 45);
+      background: rgba(45, 45, 45, 0.5);
       border-radius: 100px;
-      border: 1px solid #ff517f;
+      backdrop-filter: blur(10px);
+      border: 2px dotted #ff517f;
     }
   }
   .title {
@@ -142,17 +143,18 @@ export default {
     font-size: 14px;
     line-height: 40px;
     border-radius: 10px;
+    border: 2px dotted #fff;
   }
   /deep/.van-grid-item {
     .van-icon__image {
-      border-radius:10px;
+      border-radius: 10px;
       width: 100%;
     }
     .van-grid-item__content {
       border: 0.1333rem solid transparent;
       border-radius: 10px;
       box-shadow: 0.0533rem 0.0533rem 0.1333rem 0.0267rem rgba(0, 0, 0, 0.2);
-      padding:0;
+      padding: 0;
       background-color: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(5px);
     }
